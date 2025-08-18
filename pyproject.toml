@@ -1,0 +1,20 @@
+[project]
+name = "agentic-resources"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.116.1",
+    "fastmcp[all,client,server]>=2.11.3",
+    "httpx>=0.28.1",
+    "pypdf>=6.0.0",
+    "requests>=2.32.4",
+    "sseclient>=0.0.27",
+    "crewai>=0.51.0",
+    "litellm>=1.48.0",
+    "beautifulsoup4>=4.12.3",
+    "python-dotenv>=1.0.1",
+    "duckduckgo-search>=8.1.1",
+    "ddgs>=9.5.4",
+]

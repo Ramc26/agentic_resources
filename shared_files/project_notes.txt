@@ -1,0 +1,12 @@
+# Project AgenticAI - Meeting Notes 2025-08-18
+
+## Action Items:
+- [x] Fix the 404 error in the client by using build_app() on the server.
+- [ ] Implement a caching layer for the PDF text extraction to speed up subsequent requests.
+- [ ] Add a new tool to summarize the content of a given resource file.
+- [ ] Test the server's ability to handle at least 100 concurrent resource requests.
+
+## Discussion Points:
+- Should we return raw bytes for PDFs instead of extracted text?
+- Need to add better error handling for unsupported file types.
+- Investigate authentication methods for securing sensitive resources.`

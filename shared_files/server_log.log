@@ -1,0 +1,6 @@
+2025-08-18 14:10:15,234 INFO [main] Server startup sequence initiated.
+2025-08-18 14:10:16,876 INFO [mcp_server] Registered resource: resource://files/list
+2025-08-18 14:10:16,877 INFO [mcp_server] Registered resource template: file:///{filename}
+2025-08-18 14:10:17,112 INFO [uvicorn] Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+2025-08-18 14:12:45,543 WARNING [resource_loader] File 'annual_report.pdf' is large (15.2MB). Text extraction may be slow.
+2025-08-18 14:13:02,912 ERROR [mcp_server] Client request failed for URI: file:///non_existent_file.txt. Returning 404.
