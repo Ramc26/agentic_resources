@@ -264,13 +264,11 @@ The agent runs with `verbose=True` by default, showing detailed tool usage and d
 
 ## 📄 License
 
-This project is open source and available under the MIT License.
+None
 
 ---
 
-**Happy Building! 🚀**
-
-For more information about MCP, visit: https://modelcontextprotocol.io/
+For more information about MCP, visit: https://modelcontextprotocol.io/<br>
 For CrewAI documentation: https://docs.crewai.com/
 
 ---
