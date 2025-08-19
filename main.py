@@ -6,19 +6,20 @@ from fastapi import FastAPI
 from fastmcp import FastMCP
 from fastmcp.server.http import create_sse_app
 from tools.tool import web_get, web_search, fetch_beeceptor_data
+from tools.validation_tool import validate_contact
 
 RESOURCE_DIR = "shared_files"
 
 app = FastAPI()
-mcp_server = FastMCP(name="File Resource Server")
+mcp = FastMCP(name="File Resource Server")
 
-@mcp_server.resource("resource://greeting")
+@mcp.resource("resource://greeting")
 def greet() -> str:
     """Simple greet resource to mirror the article example."""
     return "Hey This Is Harsh👋"
 
 # Tool registrations
-@mcp_server.tool(name="web_get")
+@mcp.tool(name="web_get")
 def tool_web_get(url: str) -> str:
     """Fetch raw HTML/text from a URL and return the response text.
 
@@ -28,7 +29,7 @@ def tool_web_get(url: str) -> str:
     return web_get(url)
 
 
-@mcp_server.tool(name="web_search")
+@mcp.tool(name="web_search")
 def tool_web_search(query: str, max_results: int = 5) -> str:
     """Search the web using a lightweight DuckDuckGo endpoint.
 
@@ -41,13 +42,36 @@ def tool_web_search(query: str, max_results: int = 5) -> str:
     """
     return json.dumps(web_search(query, max_results=max_results))
 
+@mcp.tool(name="Verify Email and Phone")
+def tool_validation(input_string: str, validation_type: str):
+    """Validates a phone number or an email address using the API-Ninjas service.
+    Input should be a string containing the phone number (e.g., '+12065550100') or email (e.g., 'test@example.com'),
+    and the validation_type should be either 'phone' or 'email'.
+    """
+    return validate_contact(input_string, validation_type)
 
-@mcp_server.tool(name="get_beeceptor")
+@mcp.tool(name="get_beeceptor")
 def tool_get_beeceptor() -> str:
     """Fetch plain text data from the Beeceptor endpoint and return it as text."""
     return fetch_beeceptor_data()
 
-@mcp_server.resource("resource://files/list", mime_type="application/json")
+# PROMPT REGISTRATION EXAMPLE
+@mcp.prompt(name="simple_greet")
+def simple_greet_prompt(name: str = "there") -> str:
+    """A simple prompt that personalizes the greeting."""
+    return f"Hello, {name}! How can I help you today?"
+
+@mcp.prompt(name="summarize_text")
+def summarize_text_prompt(text: str) -> str:
+    """Prompt to instruct the LLM to summarize any given text."""
+    return f"Please summarize the following text in two sentences:\n\n{text}"
+
+@mcp.prompt(name="find_keywords")
+def find_keywords_prompt(text: str) -> str:
+    """Prompt to extract keywords from a block of text."""
+    return f"What are the main keywords in this text?\n\n{text}"
+
+@mcp.resource("resource://files/list", mime_type="application/json")
 def list_available_files() -> str:
     try:
         files = [f for f in os.listdir(RESOURCE_DIR) if os.path.isfile(os.path.join(RESOURCE_DIR, f))]
@@ -55,7 +79,7 @@ def list_available_files() -> str:
     except FileNotFoundError:
         return json.dumps({"error": f"Resource directory '{RESOURCE_DIR}' not found."})
 
-@mcp_server.resource("file:///{filename}")
+@mcp.resource("file:///{filename}")
 def serve_file_content(filename: str) -> str:
     if ".." in filename or filename.startswith("/"):
         return "Error: Invalid filename."
@@ -84,7 +108,7 @@ def serve_file_content(filename: str) -> str:
             
     return "Error: Unsupported file type."
 
-@mcp_server.resource("images://{filename}")
+@mcp.resource("images://{filename}")
 def fetch_image_bytes(filename: str) -> bytes:
     """Returns image bytes from the shared resources directory.
 
@@ -102,7 +126,7 @@ def fetch_image_bytes(filename: str) -> bytes:
         return f.read()
 
 # Provide distinct endpoints for SSE streaming and JSON-RPC message posts
-sse_app = create_sse_app(mcp_server, message_path="/message/", sse_path="/sse")
+sse_app = create_sse_app(mcp, message_path="/message/", sse_path="/sse")
 app.mount("/mcp", sse_app)
 
 
@@ -114,7 +138,7 @@ if __name__ == "__main__":
     transport = os.getenv("MCP_TRANSPORT", "http").lower()
     if transport == "stdio":
         print("Starting MCP server over stdio (set MCP_TRANSPORT=http to use HTTP/SSE)...")
-        mcp_server.run(transport="stdio")
+        mcp.run(transport="stdio")
     else:
-        print("Starting MCP server over HTTP/SSE at http://0.0.0.0:8000/mcp/")
+        print("Starting MCP server over HTTP/SSE at http://0.0.0.0:8000/sse")
         uvicorn.run(app, host="0.0.0.0", port=8000)

@@ -4,22 +4,24 @@ def tokenize(text: str) -> set[str]:
 
 def rank_files_by_query(filenames: list[str], query: str) -> list[str]:
     """Simple relevance ranking by token overlap with special-casing common intents."""
-    q = query.lower()
-    q_tokens = tokenize(q)
+    q_tokens = tokenize(query.lower())
     if not filenames:
         return []
-    if 'log' in q:
-        candidates = [f for f in filenames if 'log' in f.lower()]
-        if candidates:
-            return sorted(candidates)
-    if 'note' in q or 'meeting' in q or 'discussion' in q:
-        for name in ('project_notes.txt', 'notes.txt'):
-            for f in filenames:
-                if f.lower() == name:
-                    return [f]
-    def score(name: str) -> int:
-        tokens = tokenize(name)
-        return len(tokens & q_tokens)
-    return [name for name in sorted(filenames, key=lambda n: (-score(n), n)) if score(name) > 0][:3]
+
+    # Calculate scores for each filename based on token overlap
+    scored_files: list[tuple[int, str]] = []
+    for name in filenames:
+        name_tokens = tokenize(name)
+        score = len(name_tokens & q_tokens)
+        if score > 0:
+            scored_files.append((score, name))
+
+    # Sort the files by score (descending) and then alphabetically by name (ascending)
+    # The negative score ensures descending order for relevance, and 'name' for stable sorting.
+    sorted_files = sorted(scored_files, key=lambda item: (-item[0], item[1]))
+
+    # Extract just the filenames and return the top 3 relevant files
+    ranked_filenames = [name for score, name in sorted_files[:3]]
+    return ranked_filenames
 
 
